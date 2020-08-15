@@ -124,40 +124,37 @@ class Numeration_1 extends AbstractDecimalNumeration  {
         String last = "Z";                      // начальное положение нулевого числа для сравнения с первым
         String flip = "";                       // последнее значение в парах XI,XL и тп (5,50,500,90,900)
         int count   = 0;                        // подсчет повторений чисел кратных 1-10: I,X,C,M
-        String can  = "DLV";                    // числа, которые не могут повторяться
+        String can  = "DLV";
+        boolean isLastPare = false;  // числа, которые не могут повторяться
 
         for (int i = 0; i <rawList.length() ; i++) {
 
             String  part = rawList.substring(i, i + 1);         // часть составного числа, например I из IX
 
-            for (String key : map.keySet()) {
 
+
+
+
+
+            for (String key : map.keySet()) {
                 int curr = map.get(key);                        // текущее значение ключа для сравнения
                 int prev = map.get(last);                       // предыдущее значение ключа для сравнения
+
+
                 boolean rightOrder = curr <= prev;               // правильный порядок цифр: текущая меньше предыдущей
 
                 boolean isRightKey      = key.equals(part);     // пренадлжежит ли число правильным ключам
-                //boolean isKeyEqualsLast = key.equals(last);     // совпадает ли число с предыдущим (для пар IX,XL...)
-                boolean isKeyFlipNumber = flip.equals(key);     // была ли пара IX,XL... последней
-                //boolean canRepeat       = can.contains(key);    // можно ли повторять данное число
-
-
-
-
-
-
-
 
 
 
 
                // 1 проверка на парные числа.
-                boolean pare = ((last.equals("I") && key.equals("V")) ||
-                                (last.equals("I") && key.equals("X")) ||
-                                (last.equals("X") && key.equals("L")) ||
-                                (last.equals("X") && key.equals("C")) ||
-                                (last.equals("C") && key.equals("D")) ||
-                                (last.equals("C") && key.equals("M"))
+                boolean pare = !isLastPare && ((last.equals("I") && key.equals("V")) ||  // 4
+                                (last.equals("I") && key.equals("X")) ||    //9
+                                (last.equals("X") && key.equals("L")) ||    //40
+                                (last.equals("X") && key.equals("C")) ||    //90
+                                (last.equals("C") && key.equals("D")) ||    //400
+                                (last.equals("C") && key.equals("M"))       //900
                 );
 
 
@@ -165,29 +162,44 @@ class Numeration_1 extends AbstractDecimalNumeration  {
 
 
 
-
-
-
-
-
-
                 if (map.containsKey(part) && !key.equals("Z")) {
+                // одно общее исключение на весь блок, хотя можно и детализировать
+
+                    //  следующее меньше предыдущего и перед этим НЕ было пары типа IX(9), XC(90) и тп
+                    if (isRightKey && rightOrder && !isLastPare) {
+                        last = key;
+                        sum.add(curr);
+                        isLastPare = false;
+                        break;
+                    }
+
+
+                    // если перед этим БЫЛА пара, то новое число сравнивается с первым в той паре
+                    if (isRightKey && rightOrder && isLastPare) {
+                        if(curr < prev) {
+                        last = key;
+                        sum.add(curr);
+                        isLastPare = false;
+                        break;
+                        } else throw new WrongFormatOfExpression("invalid digit");
+                    }
 
 
 
-                    if (isRightKey) {
-                        if (rightOrder) {
-                            last = key;
-                            sum.add(curr);
-                            break;
-                        } else
-                            if (pare) {
-                                sum.add(curr - prev * 2);
-                                flip = key;
-                                last = key;
-                                break;
-                            } else throw new WrongFormatOfExpression("invalid pare");
-                    } else throw new WrongFormatOfExpression("invalid number");
+                    // пары  9  40  90 400 900
+                    if (isRightKey && !rightOrder && pare) {
+                        sum.add(curr - prev * 2);
+                        last = last;           //  с ним будем сравнивать первую цифру после пары
+                        isLastPare = true;
+                        break;
+                    }
+                    if (isRightKey && !rightOrder && !pare) {
+                        throw new WrongFormatOfExpression("invalid pare");
+                    }
+
+
+
+
 
 
 
