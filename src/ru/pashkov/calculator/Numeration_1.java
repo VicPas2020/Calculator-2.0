@@ -91,7 +91,7 @@ class Numeration_1 extends AbstractDecimalNumeration  {
     /**
      * Конвертирует число цифра за цифрой: VIII - V(5),I(1),I(1),I(1).
      * @param rawList Входящее цифра в виде строки
-     * @return сконвертированную в другую нумерацию цифру
+     * @return цифру, сконвертированную в другую нумерацию
      */
     private  String convertNumberOneByOneFromLine(String rawList) {
 
