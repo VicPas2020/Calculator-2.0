@@ -133,22 +133,16 @@ class Numeration_1 extends AbstractDecimalNumeration  {
             String  part = rawList.substring(i, i + 1);         // часть составного числа, например I из IX
 
 
-
-
             for (String key : map.keySet()) {
-                int curr = map.get(key);                        // текущее значение ключа для сравнения
-                int prev = map.get(last);                       // предыдущее значение ключа для сравнения
+                int curr  = map.get(key);                        // текущее значение ключа для сравнения
+                int prev  = map.get(last);                       // предыдущее значение ключа для сравнения
                 int prev2 = map.get(flip);                       // предыдущее значение ключа для сравнения
 
 
                 boolean rightOrder = curr <= prev;               // правильный порядок цифр: текущая меньше предыдущей
+                boolean isRightKey = key.equals(part);           // пренадлжежит ли число правильным ключам
 
-                boolean isRightKey      = key.equals(part);     // пренадлжежит ли число правильным ключам
-
-
-
-
-               // 1 проверка на парные числа.
+                // 1 проверка на парные числа.
                 boolean pare = ((last.equals("I") && key.equals("V")) ||  // 4
                                 (last.equals("I") && key.equals("X")) ||    //9
                                 (last.equals("X") && key.equals("L")) ||    //40
@@ -156,10 +150,6 @@ class Numeration_1 extends AbstractDecimalNumeration  {
                                 (last.equals("C") && key.equals("D")) ||    //400
                                 (last.equals("C") && key.equals("M"))       //900
                 );
-
-
-
-
 
 
                 if (map.containsKey(part) && !key.equals("Z")) {
@@ -185,7 +175,6 @@ class Numeration_1 extends AbstractDecimalNumeration  {
                     }
 
 
-
                     // пары  9  40  90 400 900
                     if (isRightKey && !rightOrder && pare && !isLastPare) {
                         sum.add(curr - prev * 2);
@@ -201,74 +190,7 @@ class Numeration_1 extends AbstractDecimalNumeration  {
                         throw new WrongFormatOfExpression("invalid digit "+flip+last+"+"+key);
                     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//                    if (isRightKey && !isKeyEqualsLast && rightOrder && !isKeyFlipNumber) {
-//                        last = key;
-//                        count = 0;
-//                        sum.add(curr);
-//                        break;
-//                    }
-//                    // пока оставлю этот метод, хотя не понятно что он делает
-//                    if (isRightKey && !isKeyEqualsLast && rightOrder && isKeyFlipNumber) {
-//                        throw new WrongFormatOfExpression("UNKNOWN ERROR in convertNumberOneByOneFromLine method");
-//                    }
-//
-//                    if (isRightKey && isKeyEqualsLast  && count < 2 && !isKeyFlipNumber && !canRepeat) {
-//                        count++;
-//                        sum.add(curr);
-//                        break;
-//                    }
-//                    if (isRightKey && isKeyEqualsLast  && canRepeat) {
-//                        throw new WrongFormatOfExpression("'D-L-V' REPETITION IS PROHIBITED");
-//                    }
-//                    if (isRightKey && isKeyEqualsLast  && count == 2 && !isKeyFlipNumber) {
-//                        throw new WrongFormatOfExpression("WRONG REPETITION I-X-C-M");
-//                    }
-//                    if (isRightKey && isKeyEqualsLast  && isKeyFlipNumber) {
-//                        throw new WrongFormatOfExpression("WRONG BACKWARD PAIRING");
-//                    }
-//                    if (isRightKey && !isKeyEqualsLast && !rightOrder) {
-//
-//                        if (    (last.equals("I") && key.equals("V")) ||
-//                                (last.equals("I") && key.equals("X")) ||
-//                                (last.equals("X") && key.equals("L")) ||
-//                                (last.equals("X") && key.equals("C")) ||
-//                                (last.equals("C") && key.equals("D")) ||
-//                                (last.equals("C") && key.equals("M"))
-//                            )
-//                        {
-//                            count = 0;
-//                            sum.add(curr - prev * 2);
-//                            flip = key;
-//                            last = key;
-//                            break;
-//                        } else {
-//                            throw new WrongFormatOfExpression("WRONG BACKWARD PAIRING");
-//                        }
-//                    }
-
-                } else  {
+                 } else  {
                     throw new WrongFormatOfExpression("WRONG LETTER");
                 }
             }
