@@ -95,94 +95,172 @@ class Numeration_1 extends AbstractDecimalNumeration  {
      */
     private  String convertNumberOneByOneFromLine(String rawList) {
 
-            int result = 0;
-            List<Integer> sum = new ArrayList<>();
 
-            Map<String, Integer> map = new LinkedHashMap<>();
-            map.put("I",1);
-            map.put("V",5);
-            map.put("X",10);
-            map.put("L",50);
-            map.put("C",100);
-            map.put("D",500);
-            map.put("M",1000);
-            map.put("Z",5000);                      // нужна только для подсчета МММ в начале числа
+        if (    rawList.contains("IIII") ||
+                rawList.contains("XXXX") ||
+                rawList.contains("CCCC") ||
+                rawList.contains("MMMM") ||
+                rawList.contains("VV")   ||
+                rawList.contains("LL")   ||
+                rawList.contains("DD")
+        ) throw new WrongFormatOfExpression("Prohibited repetition's rule");
 
 
-            String last = "Z";                      // начальное положение нулевого числа для сравнения с первым
-            String flip = "";                       // последнее значение в парах XI,XL и тп (5,50,500,90,900)
-            int count   = 0;                        // подсчет повторений чисел кратных 1-10: I,X,C,M
-            String can  = "DLV";                    // числа, которые не могут повторяться
 
-            for (int i = 0; i <rawList.length() ; i++) {
+        int result = 0;                                 // результат работы метода
+        List<Integer> sum = new ArrayList<>();
 
-                String  part = rawList.substring(i, i + 1);         // часть составного числа, например I из IX
+        Map<String, Integer> map = new LinkedHashMap<>();
+        map.put("I",1);
+        map.put("V",5);
+        map.put("X",10);
+        map.put("L",50);
+        map.put("C",100);
+        map.put("D",500);
+        map.put("M",1000);
+        map.put("Z",5000);                      // нужна только для подсчета МММ в начале числа (основа)
 
-                for (String key : map.keySet()) {
 
-                    int curr = map.get(key);                        // текущее значение ключа для сравнения
-                    int prev = map.get(last);                       // предыдущее значение ключа для сравнения
-                    boolean rightOrder = curr < prev;               // правильный порядок цифр: текущая меньше предыдущей
+        String last = "Z";                      // начальное положение нулевого числа для сравнения с первым
+        String flip = "";                       // последнее значение в парах XI,XL и тп (5,50,500,90,900)
+        int count   = 0;                        // подсчет повторений чисел кратных 1-10: I,X,C,M
+        String can  = "DLV";                    // числа, которые не могут повторяться
 
-                    boolean isRightKey      = key.equals(part);     // пренадлжежит ли число правильным ключам
-                    boolean isKeyEqualsLast = key.equals(last);     // совпадает ли число с предыдущим (для пар IX,XL...)
-                    boolean isKeyFlipNumber = flip.equals(key);     // была ли пара IX,XL... последней
-                    boolean canRepeat       = can.contains(key);    // можно ли повторять данное число
+        for (int i = 0; i <rawList.length() ; i++) {
 
-                    if (map.containsKey(part) && !key.equals("Z")) {
+            String  part = rawList.substring(i, i + 1);         // часть составного числа, например I из IX
 
-                        if (isRightKey && !isKeyEqualsLast && rightOrder && !isKeyFlipNumber) {
+            for (String key : map.keySet()) {
+
+                int curr = map.get(key);                        // текущее значение ключа для сравнения
+                int prev = map.get(last);                       // предыдущее значение ключа для сравнения
+                boolean rightOrder = curr <= prev;               // правильный порядок цифр: текущая меньше предыдущей
+
+                boolean isRightKey      = key.equals(part);     // пренадлжежит ли число правильным ключам
+                //boolean isKeyEqualsLast = key.equals(last);     // совпадает ли число с предыдущим (для пар IX,XL...)
+                boolean isKeyFlipNumber = flip.equals(key);     // была ли пара IX,XL... последней
+                //boolean canRepeat       = can.contains(key);    // можно ли повторять данное число
+
+
+
+
+
+
+
+
+
+
+
+               // 1 проверка на парные числа.
+                boolean pare = ((last.equals("I") && key.equals("V")) ||
+                                (last.equals("I") && key.equals("X")) ||
+                                (last.equals("X") && key.equals("L")) ||
+                                (last.equals("X") && key.equals("C")) ||
+                                (last.equals("C") && key.equals("D")) ||
+                                (last.equals("C") && key.equals("M"))
+                );
+
+
+
+
+
+
+
+
+
+
+
+
+                if (map.containsKey(part) && !key.equals("Z")) {
+
+
+
+                    if (isRightKey) {
+                        if (rightOrder) {
                             last = key;
-                            count = 0;
                             sum.add(curr);
                             break;
-                        }
-                        // пока оставлю этот метод, хотя не понятно что он делает
-                        if (isRightKey && !isKeyEqualsLast && rightOrder && isKeyFlipNumber) {
-                            throw new WrongFormatOfExpression("UNKNOWN ERROR in convertNumberOneByOneFromLine method");
-                        }
-
-                        if (isRightKey && isKeyEqualsLast  && count < 2 && !isKeyFlipNumber && !canRepeat) {
-                            count++;
-                            sum.add(curr);
-                            break;
-                        }
-                        if (isRightKey && isKeyEqualsLast  && canRepeat) {
-                            throw new WrongFormatOfExpression("'D-L-V' REPETITION IS PROHIBITED");
-                        }
-                        if (isRightKey && isKeyEqualsLast  && count == 2 && !isKeyFlipNumber) {
-                            throw new WrongFormatOfExpression("WRONG REPETITION I-X-C-M");
-                        }
-                        if (isRightKey && isKeyEqualsLast  && isKeyFlipNumber) {
-                            throw new WrongFormatOfExpression("WRONG BACKWARD PAIRING");
-                        }
-                        if (isRightKey && !isKeyEqualsLast && !rightOrder) {
-
-                            if (    (last.equals("I") && key.equals("V")) ||
-                                    (last.equals("I") && key.equals("X")) ||
-                                    (last.equals("X") && key.equals("L")) ||
-                                    (last.equals("X") && key.equals("C")) ||
-                                    (last.equals("C") && key.equals("D")) ||
-                                    (last.equals("C") && key.equals("M"))
-                                )
-                            {
-                                count = 0;
+                        } else
+                            if (pare) {
                                 sum.add(curr - prev * 2);
                                 flip = key;
                                 last = key;
                                 break;
-                            } else {
-                                throw new WrongFormatOfExpression("WRONG BACKWARD PAIRING");
-                            }
-                        }
+                            } else throw new WrongFormatOfExpression("invalid pare");
+                    } else throw new WrongFormatOfExpression("invalid number");
 
-                    } else  {
-                        throw new WrongFormatOfExpression("WRONG LETTER");
-                    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//                    if (isRightKey && !isKeyEqualsLast && rightOrder && !isKeyFlipNumber) {
+//                        last = key;
+//                        count = 0;
+//                        sum.add(curr);
+//                        break;
+//                    }
+//                    // пока оставлю этот метод, хотя не понятно что он делает
+//                    if (isRightKey && !isKeyEqualsLast && rightOrder && isKeyFlipNumber) {
+//                        throw new WrongFormatOfExpression("UNKNOWN ERROR in convertNumberOneByOneFromLine method");
+//                    }
+//
+//                    if (isRightKey && isKeyEqualsLast  && count < 2 && !isKeyFlipNumber && !canRepeat) {
+//                        count++;
+//                        sum.add(curr);
+//                        break;
+//                    }
+//                    if (isRightKey && isKeyEqualsLast  && canRepeat) {
+//                        throw new WrongFormatOfExpression("'D-L-V' REPETITION IS PROHIBITED");
+//                    }
+//                    if (isRightKey && isKeyEqualsLast  && count == 2 && !isKeyFlipNumber) {
+//                        throw new WrongFormatOfExpression("WRONG REPETITION I-X-C-M");
+//                    }
+//                    if (isRightKey && isKeyEqualsLast  && isKeyFlipNumber) {
+//                        throw new WrongFormatOfExpression("WRONG BACKWARD PAIRING");
+//                    }
+//                    if (isRightKey && !isKeyEqualsLast && !rightOrder) {
+//
+//                        if (    (last.equals("I") && key.equals("V")) ||
+//                                (last.equals("I") && key.equals("X")) ||
+//                                (last.equals("X") && key.equals("L")) ||
+//                                (last.equals("X") && key.equals("C")) ||
+//                                (last.equals("C") && key.equals("D")) ||
+//                                (last.equals("C") && key.equals("M"))
+//                            )
+//                        {
+//                            count = 0;
+//                            sum.add(curr - prev * 2);
+//                            flip = key;
+//                            last = key;
+//                            break;
+//                        } else {
+//                            throw new WrongFormatOfExpression("WRONG BACKWARD PAIRING");
+//                        }
+//                    }
+
+                } else  {
+                    throw new WrongFormatOfExpression("WRONG LETTER");
                 }
-                result = sum.stream().mapToInt(d->d).sum();
             }
-            return String.valueOf(result);
+            result = sum.stream().mapToInt(d->d).sum();
+        }
+        return String.valueOf(result);
     }
 
     @Override
